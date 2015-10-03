@@ -1,0 +1,7 @@
+# Eclipse Stuff
+.classpath
+.project
+/.settings
+
+#Generated Binaries
+/build
