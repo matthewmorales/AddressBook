@@ -5,13 +5,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class Entity {
+public abstract class Entity {
 	private static Properties props = new Properties();
 	private static final String url = "jdbc:postgresql://localhost/address_book";
 	private static Connection conn;
 	
-	Entity(){
-		
+	Entity(){	
 	}
 	
 	protected Connection getDBConnection() throws SQLException{
