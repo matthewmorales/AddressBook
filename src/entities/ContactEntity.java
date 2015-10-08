@@ -82,7 +82,11 @@ public class ContactEntity extends Entity {
 	}
 
 	public void setStreetNumber(String streetNumber) {
-		this.streetNum = (streetNumber == null) ? null : Integer.parseInt(streetNumber);
+		try{
+			this.streetNum = (streetNumber == null || streetNumber.isEmpty()) ? null : Integer.parseInt(streetNumber);
+		} catch(NumberFormatException e) {
+			this.streetNum = null;
+		}
 	}
 
 	public String getStreetName() {
@@ -98,7 +102,11 @@ public class ContactEntity extends Entity {
 	}
 
 	public void setZipCode(String zipCode) {
-		this.zipCode = (zipCode == null) ? null : Integer.parseInt(zipCode);
+		try{
+			this.zipCode = (zipCode == null || zipCode.isEmpty()) ? null : Integer.parseInt(zipCode);
+		} catch(NumberFormatException e) {
+			this.zipCode = null;
+		}
 	}
 
 	public String getEmailAddress() {
@@ -245,13 +253,6 @@ public class ContactEntity extends Entity {
 				+ "(first_name, last_name, phone_number, city, state, street_number, street_name, "
 				+ "zip_code, email_address, location ) VALUES"
 				+ "(?,?,?,?,?,?,?,?,?,?)";
-		
-		
-		if(phoneNum.isEmpty() || phoneNum == null){
-			json = new JSONObject("{\"failure\":\"A contact must have a phone number \"}");
-			return json;
-		}
-		
 		try{
 			conn = getDBConnection();
 			pstmt = conn.prepareStatement(sql);

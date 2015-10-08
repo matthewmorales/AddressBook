@@ -4,30 +4,143 @@
 		<meta charset="UTF-8">
 		<title>Insert title here</title>
 		<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
-		<script type="text/javascript" src="js/jquery.bootgrid.min.js"></script>
+			<script type="text/javascript" src="js/jquery.bootgrid.min.js"></script>
+			<link rel="stylesheet" type="text/css" href="css/jquery.bootgrid.min.css">
+			<link rel="stylesheet" type="text/css" href="css/font-awesome.css">
+			
 	</head>
 
 	<body>
-		<table id="grid-data" class="table table-condensed table-hover table-striped">
+		<form class="ajax" id="contact-form" action="/AddressBook/contacts/new" method="post">
+			<div class = "lazy-formatting">
+				<input class="contact-input" type="text" name=id hidden>
+				<input class="contact-input" type="text" name="first_name" placeholder="First Name">
+				<input class="contact-input" type="text" name="last_name" placeholder="Last Name">
+				<input class="contact-input" type="text" name="location" placeholder="Location">
+				<input class="contact-input" type="text" name="phone_number" placeholder="Phone Number">
+				<input class="contact-input" type="text" name="email_address" placeholder="Email">
+				<input class="contact-input" type="text" name="street_number" placeholder="Street Number">
+				<input class="contact-input" type="text" name="street_name" placeholder="Street Name">
+				<input class="contact-input" type="text" name="city" placeholder="City">
+				<input class="contact-input" type="text" name="state" placeholder="state">
+				<input class="contact-input" type="text" name="zip_code" placeholder="zip_code">
+			</div>
+			<input type="submit" value="Submit">
+			<input type="button" class="reset" value="RESET">
+		</form>
+		<table id="grid-data" class="table table-condensed table-hover table-striped" data-toggle="bootgrid">
 		    <thead>
 		        <tr>
 		            <!-- <th data-column-id="id" data-type="numeric">ID</th> -->
+		            <th data-column-id="id">id</th>
 		            <th data-column-id="first_name">First Name</th>
 		            <th data-column-id="last_name">Last Name</th>
+		            <th data-column-id="location">location</th>
 		            <th data-column-id="phone_number">Phone Number</th>
+		            <th data-column-id="email_address">email address</th>
+		            <th data-column-id="street_number">street num</th>
+		            <th data-column-id="street_name">street name</th>
+		            <th data-column-id="city">city</th>
+		            <th data-column-id="state">state</th>
+		            <th data-column-id="zip_code">zip code</th>
+		            <th data-column-id="commands" data-formatter="commands" data-sortable="false">Commands</th>
 		        </tr>
 		    </thead>
 		</table>
-	</body>
-</html>
+	</body>	
+	<script type="text/javascript">
+		var contactForm = $('#contact-form');
+		var iterator = 0;
+		var grid;
+		
+		$(".reset").click(function() {
+		    contactForm.find("input[type=text], textarea").val("");
+		    contactForm.attr("action", "/AddressBook/contacts/new");
+		});
+		
+		$('form.ajax').on('submit', function(){
+			var that = $(this),
+				url = that.attr('action'),
+				type = that.attr('method'),
+				data={};
+			
+			that.find('[name]').each(function(){
+				var that = $(this),
+					name = that.attr('name'),
+					value = that.val();
+				
+				data[name] = value;
+			});
+			
+			$.ajax({
+				url: url,
+				type: type,
+				data: data,
+				success: function(response){
+					console.log(response);
+				}
+			});
+			location.reload();
+			return false;
+		});
+		
+		$(document).ready(function(){
+				grid = $("#grid-data").bootgrid({
+			    navigation: 0,
+				ajax: true,
+			    ajaxSettings: {
+			        method: "GET",
+			        cache: false
+			    },
+			    responseHandler: function(response){
+			    	var json = {};
+			    	json["current"] = 1;
+			    	json["rowCount"] = 10;
+			    	json["rows"] = response;
+			    	json["total"] = response.length;
+			    	console.log(response);
+			    	console.log(json);
+			    	return json;
+			    },
+			    url: "/AddressBook/contacts/all",
+			    formatters: {
+			    	"commands":function(column, row){
+			    		return "<button type=\"button\" class=\"btn btn-xs btn-default command-edit\" data-row-id=\"" + row.id + "\"><span class=\"fa fa-pencil\"></span></button> " + 
+		                "<button type=\"button\" class=\"btn btn-xs btn-default command-delete\" data-row-id=\"" + row.id + "\"><span class=\"fa fa-trash-o\"></span></button>";
+			    	}
+			    }
+			}).on("loaded.rs.jquery.bootgrid", function(){
+				grid.find(".command-edit").on("click", function(e){
+			        //alert("You pressed edit on row: " + $(this).data("row-id"));
+			        var row = $(this).closest('tr');
+			        
+			        var counter = 0;
+			        row.find('[style]').each(function(i){
+			        		i++;
+				        	var index = $(this),
+				        		val = index.html(),
+				        		field = contactForm.find('.contact-input:nth-child(' + i + ')');
+				        		field.val(val);
+			        });
+			        
+			        contactForm.attr("action", "/AddressBook/contacts/save");
 
-<script type="text/javascript">
-$("#grid-data").bootgrid({
-    ajax: true,
-    ajaxSettings: {
-        method: "GET",
-        cache: false
-    },
-    url: "/AddressBook/contacts/all"
-});
-</script>
+				}).end().find(".command-delete").on("click", function(e){
+						var deleteData = {id:$(this).data("row-id")};
+						$.ajax({
+							url: "/AddressBook/contacts/delete",
+							type: "POST",
+							data: deleteData,
+							success: function(data){
+						        alert(data["success"]);
+								$("#grid-data").bootgrid("reload");
+							},
+							failure: function(data){
+								alert(data["error"]);
+							}
+						});				
+				});
+			});	
+		});
+	</script>
+</html>

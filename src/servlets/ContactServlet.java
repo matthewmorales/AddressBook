@@ -35,7 +35,7 @@ public class ContactServlet extends HttpServlet {
     @Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String pathInfo = req.getPathInfo();
-		if(pathInfo.equals("/all")){
+		if(pathInfo.equalsIgnoreCase("/all")){
 			doGetAll(req, res);
 		} else{
 			res.setContentType("application/json");
@@ -47,13 +47,13 @@ public class ContactServlet extends HttpServlet {
     @Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String pathInfo =req.getPathInfo();
-		if(pathInfo.equals("/new")){
+		if(pathInfo.equalsIgnoreCase("/new")){
 			doPostNew(req, res);
 		}
-		else if(pathInfo.equals("/delete")){
+		else if(pathInfo.equalsIgnoreCase("/delete")){
 			doPostDelete(req, res);
 		}
-		else if(pathInfo.equals("/save")){
+		else if(pathInfo.equalsIgnoreCase("/save")){
 			doPostEdit(req, res);
 		} else{
 			res.setContentType("application/json");
